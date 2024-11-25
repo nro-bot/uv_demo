@@ -1,8 +1,8 @@
 import re
 import pandas as pd
 from rich import print 
-from rich.traceback import install
-install(show_locals=True)
+#from rich.traceback import install
+#install(show_locals=True)
 
 
 def get_regexs():
@@ -53,7 +53,12 @@ def find_gleasons(text: str):
             max(0, gl.start()-50), min(gl.end()+80, len(text))
         context = text[context_start:context_end]
 
-        candidate = text[gl.start():context_end]
+        # Cut at next occurence of gleason, in case second one in window
+        end = context_end
+        if 'gleason' in text[gl.start()+1:context_end]:
+            end = text[gl.start()+1:context_end].find('gleason')
+            end = end + gl.start()+1
+        candidate = text[gl.start():end]
 
         gleason_match = find_matches(candidate)
         if gleason_match:
