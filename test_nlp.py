@@ -9,26 +9,55 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-
-sys.path.append(os.path.abspath(os.path.join("..")))
 from phenoxtractor import find_gleasons 
-#import phenoxtractor
 
-def schema():
-    class Schema(pa.DataFrameModel): 
-        PatientICN: int = pa.Field(ge=1_000_000_000, lt=1_100_000_000), #6 digit int leading with 10
-        TextSID: int = pa.Field(ge=800_000_000_000)
-        Start: int
-        End: int
-        Text: int = pa.Field(ge=0, le=9)
-        Label: pa.Fields(isin=['Gleason_total', 'Gleason_1', 'Gleason_2'])
-
-        class Config:
-            ordered = True
+#def schema():
 
 def test_find_gleasons():
-    assert len(phenoxtractor.find_gleasons('hello world')) == 0
-    assert len(phenoxtractor.find_gleasons('gleason score 3+3=6')) == 3
+    assert len(find_gleasons('hello world')) == 0
+    assert len(find_gleasons('gleason score 3+3=6')) == 3
+
+# def test_truth_df_schema_v2():
+    # # Use dataclass-inspired format of pandera 
+    # class TruthLabelSchema(pa.DataFrameModel): 
+        # PatientICN: int = pa.Field(ge=1_000_000_000, lt=1_100_000_000), #6 digit int leading with 10
+        # TextSID: int = pa.Field(ge=800_000_000_000)
+        # Start: int
+        # End: int
+        # Text: int = pa.Field(ge=0, le=9)
+        # Label: pa.Field(isin=['Gleason_total', 'Gleason_1', 'Gleason_2'])
+
+        # class Config:
+            # ordered = True
+
+    #truth_df = get_mock_truth_df()
+    #assert isinstance(TruthLabelSchema.validate(truth_df), pd.DataFrame)
+
+def test_truth_df_schema(): 
+    schema = pa.DataFrameSchema({
+     'PatientICN': pa.Column(
+         int,
+         checks = [
+             pa.Check(lambda x: 1_000_000_000 <= x),
+             pa.Check(lambda x: x < 1_100_000_000)
+        ]),
+    'TextSID': pa.Column(int, checks=pa.Check.ge(800_000_000_000)),
+    'Start': pa.Column(int),
+    'Text': pa.Column(
+        pd.StringDtype(), 
+        checks = [ 
+            pa.Check(lambda x: 0<=x.astype(int)),
+            pa.Check(lambda x: x.astype(int)<=9)
+         ]),
+    'Label': pa.Column(pd.StringDtype())
+    }, 
+    strict=False)
+    #'End': pa.Column(int),
+    #pa.isin=['Gleason_total', 'Gleason_1', 'Gleason_2'])
+    mock_truth_df = get_mock_truth_df()
+    print(mock_truth_df)
+    assert isinstance(schema.validate(mock_truth_df), pd.DataFrame)
+
 
 MOCKSID = 1231231231230
 def get_mock_truth_df():
@@ -75,7 +104,7 @@ def get_mock_results_df():
     for i, row in text_df.iterrows():
         #    print(row)
         #    print(find_gleasons(row.ReportText))
-        gl = phenoxtractor.find_gleasons(row.ReportText)
+        gl = find_gleasons(row.ReportText)
         gl = [[MOCKSID] + x for x in gl]
         results.extend(gl)
 
@@ -99,6 +128,7 @@ def get_mock_results_df():
 
 def eval_find_gleasons():
     predicted = get_mock_results_df()
+    truth_df = get_mock_truth_df()
 
     metrics = truth_df.merge(
             predicted, on=["TextSID", "Start"], suffixes=["_True", "_Pred"],
