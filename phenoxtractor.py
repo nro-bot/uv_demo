@@ -85,29 +85,6 @@ def process_report(report_df: pd.DataFrame):
 #def extract(doc):
     #print('Hello world from phenoxtract')
 
-def get_mock_labels_df():
-    # make dummy deF
-    df = pd.DataFrame(
-        [
-            [1010101010, 1231231231230, 11, 3, 'Gleason_1'], 
-            [1010101010, 1231231231230, 13, 4, 'Gleason_2'], 
-            [1010101010, 1231231231230, 16, 7, 'Gleason_total'], 
-        ],
-        columns = ['PatientICN', 'TextSID', 'Start', 'Text', 'Label']
-    )
-    return df
-
-
-def get_mock_text_df():
-    strs = get_test_strs()
-    df = pd.DataFrame(
-        [
-            [1010101010, 1231231231230, strs[0]], 
-        ],
-        columns = ['PatientICN', 'TIUDocumentSID', 'ReportText']
-    )
-    return df
-
 def evaluate_predictions(ground_truth: pd.DataFrame, predicted_lbls: pd.DataFrame):
     y_true = ground_truth['Label']
     labels = ['Gleason_total', 'Gleason_1', 'Gleason_2']
