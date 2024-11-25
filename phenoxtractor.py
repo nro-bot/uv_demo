@@ -5,6 +5,23 @@ from rich import print
 #install(show_locals=True)
 
 
+def find_gl_with_spacy(text: str):
+    import spacy
+    from spacy.matcher import Matcher
+    nlp = spacy.load("en_core_web_sm")
+    matcher = Matcher(nlp.vocab)
+    regex_total_last = get_regexs()['regex_total_last']
+    matcher.add("GLEASON_TOTAL_LAST", [[{"TEXT": {"regex": regex_total_last}}]])
+    doc = nlp(text)
+    matches = matcher(doc)
+    results = []
+    for id, start, end in matches:
+        matched_span = doc[start:end]
+        print(matched_span.text)
+        results.append(matched_span.text)
+    return results
+
+
 def get_regexs():
     #_3to5_ = '[3-5]'
     _6to10_ = r'\b[6-9]|10\b'
@@ -78,19 +95,18 @@ def test_find_gleasons():
         print(sample)
         print(find_gleasons(sample))
 
+def test_find_spacy():
+    for sample in get_test_strs():
+        print(sample)
+        print(find_gl_with_spacy(sample))
 
 def process_report(report_df: pd.DataFrame):
     all_results = []
 
-#def extract(doc):
-    #print('Hello world from phenoxtract')
 
 def evaluate_predictions(ground_truth: pd.DataFrame, predicted_lbls: pd.DataFrame):
     y_true = ground_truth['Label']
     labels = ['Gleason_total', 'Gleason_1', 'Gleason_2']
-
-    # test
-
 
 def get_test_strs():
     str1A = 'gleason score 3+3 = 6; 3 of 3 cores; 40%'
@@ -111,7 +127,8 @@ def get_test_strs():
 
 def main():
     print("Designed to extract phenotypes from EHR")
-    test_find_gleasons()
+    #test_find_gleasons()
+    test_find_spacy()
 
 if __name__ == "__main__":
     main()

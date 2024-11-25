@@ -18,3 +18,5 @@ uv run phenoxtractors.py # a few demo strings here currently -- temporary
 
 - Explore using dataclass-inspired DataFrameModel instead of object-oriented DataFrameSchema
 -- Reference: https://pandera.readthedocs.io/en/stable/index.html
+
+uv pip compile pyproject.toml -o requirements.txt
