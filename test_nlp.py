@@ -49,19 +49,21 @@ def test_truth_df_schema():
             pa.Check(lambda x: 0<=x.astype(int)),
             pa.Check(lambda x: x.astype(int)<=9)
          ]),
-    'Label': pa.Column(pd.StringDtype())
+    'Label': pa.Column(pd.StringDtype(), 
+        checks = [
+            pa.Check(lambda x: x in ['Gleason_total', 'Gleason_1',
+            'Gleason_2'])
+        ])
     }, 
-    strict=False)
+    strict=False) # Mandate columns exactly match, no more no less
     #'End': pa.Column(int),
-    #pa.isin=['Gleason_total', 'Gleason_1', 'Gleason_2'])
     mock_truth_df = get_mock_truth_df()
     print(mock_truth_df)
     assert isinstance(schema.validate(mock_truth_df), pd.DataFrame)
 
 
-MOCKSID = 1231231231230
 def get_mock_truth_df():
-    # make dummy deF
+    # make dummy df
     df = pd.DataFrame(
         [
             [1010101010, 1231231231230, 25, 3, "Gleason_1"],
@@ -95,7 +97,6 @@ def get_mock_text_df():
     return df
 
  
-
 def get_mock_results_df():
     MOCKSID = 1231231231230
     results = []
