@@ -4,6 +4,9 @@
 uv venv
 uv sync
 source .venv/bin/activate
+uv venv --python 3.11.5
+uv python pin 3.11.5 #  
+uv run -- spacy download en_core_web_sm   
 ```
 
 Commands:
