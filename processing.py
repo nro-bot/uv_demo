@@ -13,7 +13,7 @@ HOME = Path(SERVER) / PROJ_HOME / DATA_DIR
 text_files = {
     'small': 'uploaded_samples/Pathology_train_supplement.csv', # 5.4k, Fulltext, Gleason bool, 40 px
     'big': 'uploaded_samples/Pathology_training_1-3_for_analysis.csv', # 19k, fulltext, gleason bool,  136 px
-    'huge': 'Gleason_Pathology_Reports_for_Annotation_no-duplicates.csv' # 2133k, fulltext, gleason bool, 144k px
+    '__huge': 'Gleason_Pathology_Reports_for_Annotation_no-duplicates.csv' # 2133k, fulltext, gleason bool, 144k px
 }
 
 label_files = {
@@ -44,6 +44,8 @@ def print_info(fname: Path):
 
 def print_files_info():
     for key, fname in text_files.items():
+        if fname[:2] == '__' :
+            continue
         print_info(HOME / fname)
 
 if __name__ == '__main__':
