@@ -32,12 +32,12 @@ def get_regexs():
     conjunction = r"&|and|\+"
     regex_total_last = rf"([3-5])\D*([3-5])\D*({_6to10_})"
     regex_total_first = rf"({_6to10_})\D*([3-5])\D*([3-5])"
-    regex_nototal = rf"([3-5])\s*({conjunction})\s*([3-5])"
+    regex_no_total = rf"([3-5])\s*({conjunction})\s*([3-5])"
 
     return {
         "regex_total_last": regex_total_last,
         "regex_total_first": regex_total_first,
-        "regex_nomax": regex_nototal,
+        "regex_no_total": regex_no_total,
     }
 
 
@@ -59,7 +59,12 @@ def find_total_first(text: str) -> list[int] | None:
     return None
 
 
-def find_nomax():
+def find_no_total(text: str) -> list[int] | None:
+    m = re.search(get_regexs()['regex_no_total'], text)
+    if m:
+        gleason1, gleason2 = int(m.groups(1)), int(m.groups(3))
+        idx1, idx2 = m.start(1), m.start(2)
+
     return None
 
 
@@ -82,23 +87,22 @@ def find_gleasons(text: str):
         context = text[context_start:context_end]
 
         # Cut at next occurence of gleason, in case second one in window
-        end = context_end
-        if "gleason" in text[gl.start() + 1 : context_end]:
-            end = text[gl.start() + 1 : context_end].find("gleason")
-            end = end + gl.start() + 1
-        candidate = text[gl.start() : end]
-
+        end = text[gl.start()+1 : context_end].find("gleason")
+        if end == -1:
+            candidate=text[gl.start() : context_end]
+        else:
+            end += gl.start()+1
+            candidate=text[gl.start() : end]
         gleason_match = find_matches(candidate)
 
         if gleason_match:
             idx1, idx2, idx_total, gleason1, gleason2, gleason_total = gleason_match
             # start, text, label, context
-            match = [start + idx1, gleason1, "Gleason_1", context]
-            all_matches.append(match)
-            match = [start + idx2, gleason2, "Gleason_2", context]
-            all_matches.append(match)
-            match = [start + idx_total, gleason_total, "Gleason_total", context]
-            all_matches.append(match)
+            all_matches.extend([
+                [start+idx1, gleason1, "Gleason_1", context],
+                [start+idx2, gleason2, "Gleason_2", context],
+                [start+idx_total, gleason_total, "Gleason_total", context]
+            ])
 
     return all_matches
 
@@ -114,10 +118,6 @@ def test_find_spacy():
         print(sample)
         print(find_gl_with_spacy(sample))
 
-
-def evaluate_predictions(ground_truth: pd.DataFrame, predicted_lbls: pd.DataFrame):
-    y_true = ground_truth["Label"]
-    labels = ["Gleason_total", "Gleason_1", "Gleason_2"]
 
 
 def get_test_strs():
@@ -144,8 +144,8 @@ def get_test_strs():
 
 def main():
     print("Designed to extract phenotypes from EHR")
-    # test_find_gleasons()
-    test_find_spacy()
+    test_find_gleasons()
+    #test_find_spacy()
 
 
 if __name__ == "__main__":
