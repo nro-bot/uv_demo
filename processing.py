@@ -33,7 +33,7 @@ def print_info(fname: Path):
             subprocess.run(['head', '-n', '1', fname], capture_output=True, text=True).stdout
         )
         print('DF: ', 
-            pd.read_csv(file, nrows=2)
+            pd.read_csv(fname, nrows=2)
         )
         print('NUM LINES: ', 
             subprocess.run(['wc', '-l', fname], capture_output=True, text=True).stdout.split()[0]
