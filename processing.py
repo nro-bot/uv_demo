@@ -44,7 +44,7 @@ def print_info(fname: Path):
 
 def print_files_info():
     for key, fname in text_files.items():
-        if fname[:2] == '__' :
+        if key[:2] == '__' :
             continue
         print_info(HOME / fname)
 
