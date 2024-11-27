@@ -11,7 +11,6 @@ from typing import Tuple
 
 def get_path_consts():
     SERVER = '\\\\vacrrdevmavdi01.vha.med.va.gov\\'
-    SERVER = '\\\\vacrrdevmavdi01.vha.med.va.gov'
     PROJ_HOME = 'Projects/OncApps/data/profound/'
     DATA_DIR = 'annotations/'
 
