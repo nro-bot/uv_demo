@@ -244,7 +244,7 @@ def extract_and_eval():
         columns=['Start', 'Text', 'Label', 'Context', 'PatientICN', 'TextSID']
     )
     
-    from model_evaluator import eval_gleason
+    from model_evaluator import eval_gleason_model
     eval_gleason_model(truth, predictions)
 
 
