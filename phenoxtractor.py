@@ -14,13 +14,20 @@ from rich import print
 
 
 def find_gl_with_spacy(text: str):
+    """
+    Finds Gleason score patterns in text using spaCy and regex.
+    Regex against full text, then matches are validated against SpaCy token spans and printed if valid.
+
+    Args:
+        text (str): Input text to analyze.
+
+    Returns:
+        list: Matched spans or an empty list if none are found.
+    """
     import spacy
     from spacy.matcher import Matcher
 
     nlp = spacy.load("en_core_web_sm")
-    #matcher = Matcher(nlp.vocab)
-    #regex_total_last = get_regexs()["regex_total_last"]
-    #matcher.add("GLEASON_TOTAL_LAST", [[{"TEXT": {"regex": regex_total_last}}]])
     results = []
     doc = nlp(text)
     for match in re.finditer(get_regexs()['regex_total_last'], doc.text):
@@ -108,21 +115,20 @@ def checksum(a,b,c) -> bool:
 
 def find_any_gleason(text: str) -> list[int] | None:
     """
-    Attempts to extract Gleason score information from the input text using multiple patterns.
+    Extracts Gleason score information from the input text using multiple patterns. 
 
-    Three functions are used.
-    - `find_total_last()`: Searches for Gleason scores with the total appearing at the end.
-    - `find_total_first()`: Searches for Gleason scores with the total appearing at the beginning.
-    - `find_no_total()`: Searches for Gleason scores where the total is not explicitly mentioned.
+    Three patterns are used.
+    - `find_total_last()`: Gleason scores with the total at the end.
+    - `find_total_first()`: Scores with the total at the beginning.
+    - `find_no_total()`: Scores where the total is not mentioned..
 
-    The function returns the first successful match found from these checks. 
+    The function returns the first successful match found. 
 
     Args:
-        text (str): The input text to search for Gleason score information.
+        text (str): The input text to search.
 
     Returns:
-        list[int] | None: The extracted indices and scores from the first
-        successful pattern match. List of length 6. Returns `None` if no patterns match.
+        list[int] | None: List of 3 indices and and 3 scores, or returns `None` if no patterns match.
     """
     if vals := find_total_last(text) \
         or find_total_first(text) \
@@ -139,11 +145,11 @@ def find_gleasons(text: str):
         text (str): The input text to analyze for Gleason scores.
 
     Returns:
-        list[list[[int, str]]: A list of lists, where each inner list represents a Gleason score match and contains:
+        A list of lists. Each inner list represents a Gleason score match.  Inner list contains:
             - The starting index of the score in the text.
             - The extracted Gleason score value.
-            - A label indicating whether it is "Gleason_1", "Gleason_2", or "Gleason_total".
-            - A string representing the context window around the score.
+            - Label: One of  "Gleason_1", "Gleason_2", or "Gleason_total".
+            - A string of the context window around the score.
 
         Returns an empty list if no Gleason scores are found.
     """

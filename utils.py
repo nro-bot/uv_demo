@@ -8,13 +8,10 @@ from phenoxtractor import find_gleasons
 
 MOCKSID = 1231231231230
 
-def get_truth_df():
-    return df
-
-def get_text_df():
-    return df
 
 def get_mock_truth_df():
+    '''Generate mock dataframe of ground truth gleason score values.
+    '''
     # make dummy df
     df = pd.DataFrame(
         [
@@ -34,6 +31,8 @@ def get_mock_truth_df():
 
 
 def get_mock_text_df():
+    '''Generate mock dataframe of pathology report text. 
+    '''
     df = pd.DataFrame(
         [
             [
@@ -53,6 +52,8 @@ def get_mock_text_df():
 
 
 def get_mock_results_df():
+    '''Turn find_gleasons into a properly formatted dataframe and return.
+    '''
     results = []
     text_df = get_mock_text_df()
     for i, row in text_df.iterrows():
@@ -79,9 +80,17 @@ def get_mock_results_df():
     )
     return df
 
-
-
 def eval_find_gleasons(mock=True):
+    """
+    Evaluates the performance of a Gleason score prediction model using precision, recall, and F1 score.
+
+    The function compares predicted and true labels, computes metrics (TP, FP, FN), and displays:
+    - Precision, recall, and F1 score.
+    - A confusion matrix plot.
+
+    Args:
+        mock (bool): If True, uses mock data for evaluation. Defaults to True.
+    """
     if mock:
         predicted = get_mock_results_df()
         truth_df = get_mock_truth_df()
