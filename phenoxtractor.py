@@ -237,9 +237,11 @@ def extract_and_eval():
 
 
         gleasons = find_gleasons(text)
-        predictions.extend(
-            gleasons.extend([pid, sid])
-        )
+        annotated_gleasons = []
+        for gl in gleasons:
+            gl.extend([pid, sid])
+            annotated_gleasons.append(gl)
+        predictions.extend(annotated_gleasons)
 
     predictions = pd.DataFrame(predictions, 
         columns=['Start', 'Text', 'Label', 'Context', 'PatientICN', 'TextSID']

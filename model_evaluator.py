@@ -20,11 +20,11 @@ def eval_gleason_model(truth_df: pd.DataFrame | None, predictions_df: pd.DataFra
     if truth_df is None: 
         truth_df = utils.get_mock_truth_df()
     if predictions_df is None:
-        predicts_df = utils.get_mock_results_df()
+        predictions_df = utils.get_mock_results_df()
 
 
     metrics = truth_df.merge(
-        predicts_df, on=["TextSID", "Start"], suffixes=["_True", "_Pred"], how="outer"
+        predictions_df, on=["TextSID", "Start"], suffixes=["_True", "_Pred"], how="outer"
     )
 
     metrics = metrics.assign(
