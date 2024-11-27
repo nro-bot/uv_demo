@@ -9,6 +9,7 @@ from rich import print
 from typing import Tuple
 
 SERVER = '\\\\vacrrdevmavdi01.vha.med.va.gov\\'
+SERVER = '\\\\vacrrdevmavdi01.vha.med.va.gov'
 PROJ_HOME = 'Projects/OncApps/data/profound/'
 DATA_DIR = 'annotations/'
 USER = 'ruiouyang/'
