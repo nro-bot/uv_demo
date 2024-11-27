@@ -35,6 +35,8 @@ def get_path_consts():
         '_medium_fulltext': TEXT_FILES['small']
     }  
 
+    return TEXT_FILES, LABEL_FILES
+
 def get_data(files_dict_key='small') -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Load text and label data from CSV files (from hardcoded paths), loading small files by default.
