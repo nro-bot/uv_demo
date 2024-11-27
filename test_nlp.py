@@ -6,9 +6,8 @@ import seaborn as sns
 from phenoxtractor import find_gleasons
 from utils import get_mock_results_df, get_mock_truth_df
 
+
 # def schema():
-
-
 def test_find_gleasons():
     assert len(find_gleasons("hello world")) == 0
     assert len(find_gleasons("gleason score 3+3=6")) == 3
@@ -37,7 +36,7 @@ def test_truth_df_schema():
                 pd.StringDtype(),
                 checks=[
                     pa.Check(lambda x: x.isin(["Gleason_total", "Gleason_1", "Gleason_2"]))
-                ],
+                ]
             ),
         },
         strict=False,
@@ -46,6 +45,8 @@ def test_truth_df_schema():
     mock_truth_df = get_mock_truth_df()
     print(mock_truth_df)
     assert isinstance(schema.validate(mock_truth_df), pd.DataFrame)
+
+# Mapping TextSID : TIUDocumentSID, 'Start'
 
 
 def eval_find_gleasons():
