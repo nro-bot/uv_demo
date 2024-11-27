@@ -9,7 +9,6 @@ from rich import print
 from typing import Tuple
 
 SERVER = '\\\\vacrrdevmavdi01.vha.med.va.gov\\'
-SERVER = '\\\\vacrrdevmavdi01.vha.med.va.gov'
 PROJ_HOME = 'Projects/OncApps/data/profound/'
 DATA_DIR = 'annotations/'
 USER = 'ruiouyang/'
@@ -27,7 +26,7 @@ def get_path_consts():
     }
 
     LABEL_FILES = {
-        'small': 'annotated_data/adjudicated_train-supplement_gleason_2024-09-07.csv',  # 0.3k, no fulltext, gleason int, 40 px
+        'small': 'annotated_data/adjudicated_train-supplement_gleason_2024-09-27.csv',  # 0.3k, no fulltext, gleason int, 40 px
         # - PatientICN, TextSID, Start, ..., Text, Label
         # - where Text = extracted score
 
@@ -54,7 +53,7 @@ def get_data(files_dict_key='small') -> Tuple[pd.DataFrame, pd.DataFrame]:
     TEXT_FILES, LABEL_FILES = get_path_consts() 
 
     labels = pd.read_csv(HOME / LABEL_FILES[files_dict_key])
-    text = pd.read_csv(HOME / LABEL_FILES[f'__{files_dict_key}__']) 
+    text = pd.read_csv(HOME / LABEL_FILES[f'_{files_dict_key}_fulltext']) 
 
     norm = {
         'TIUDocumentSID':'TextSID', 

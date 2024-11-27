@@ -233,7 +233,8 @@ def extract_and_eval():
     for i, row in data.iterrows():
         pid = row.PatientICN
         sid = row.TextSID
-        text = data.ReportText
+        text = row.ReportText
+
 
         gleasons = find_gleasons(text)
         predictions.extend(
