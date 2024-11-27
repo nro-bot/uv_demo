@@ -1,3 +1,10 @@
+"""
+Extract gleason scores from health record text (pathology reports).
+Uses regex for now.
+
+26 Nov 2024 
+nrobot
+"""
 import pandas as pd
 import re
 from rich import print
@@ -19,14 +26,16 @@ def find_gl_with_spacy(text: str):
     for match in re.finditer(get_regexs()['regex_total_last'], doc.text):
         start, end = match.span()
         span = doc.char_span(start, end)
-        # This is a Span object or None if match doesn't map to valid token sequence
+        # This is a Span object or None,  if match doesn't map to valid token sequence
         if span is not None:
             print("Found match:", span.text)
             print([span.start, span.end, span.label, span.text])
     return results
 
 
-def get_regexs():
+def get_regexs() -> Dict[str, str]:
+    """Return dictionary of regex strings.
+    """
     # _3to5_ = '[3-5]'
     _6to10_ = r"\b[6-9]|10\b"
     conjunction = r"&|and|\+"
@@ -42,6 +51,20 @@ def get_regexs():
 
 
 def find_total_last(text: str) -> list[int] | None:
+    """
+    Extracts and returns the indices and values of Gleason scores and their total from a given text.
+
+    If the pattern is found, it extracts three numerical values representing two individual Gleason scores and their total, as well as their starting indices in the text. 
+
+    Specifically, this function finds patterns of A + B = C.
+
+    Args:
+        text (str): The input text to search for the Gleason score pattern.
+
+    Returns:
+        list[int] | None: If a match is found, returns a list of six items: the three string indices and three gleason values. Returns `None` if no match is found.
+    """
+
     m = re.search(get_regexs()["regex_total_last"], text)
     if m:
         gleason1, gleason2, gleason_total = [int(digit) for digit in m.groups()]
@@ -51,6 +74,11 @@ def find_total_last(text: str) -> list[int] | None:
 
 
 def find_total_first(text: str) -> list[int] | None:
+    """
+    See find_total_last().
+    Specifically, this function finds patterns of C = A + B. 
+    """
+
     m = re.search(get_regexs()["regex_total_first"], text)
     if m:
         gleason_total, gleason1, gleason2 = [int(digit) for digit in m.groups()]
@@ -60,6 +88,10 @@ def find_total_first(text: str) -> list[int] | None:
 
 
 def find_no_total(text: str) -> list[int] | None:
+    """
+    See find_total_last().
+    Specifically, this function finds patterns of A + B, A & B, or A and B
+    """
     m = re.search(get_regexs()['regex_no_total'], text)
     if m:
         gleason1, gleason2 = int(m.group(1)), int(m.group(3))
@@ -69,10 +101,29 @@ def find_no_total(text: str) -> list[int] | None:
     return None
 
 def checksum(a,b,c) -> bool:
+    """
+    Unused. Can be used in future to sanity check extracted numbers.
+    """
     return a+b==c
 
+def find_any_gleason(text: str) -> list[int] | None:
+    """
+    Attempts to extract Gleason score information from the input text using multiple patterns.
 
-def find_any_gleason(text: str):
+    Three functions are used.
+    - `find_total_last()`: Searches for Gleason scores with the total appearing at the end.
+    - `find_total_first()`: Searches for Gleason scores with the total appearing at the beginning.
+    - `find_no_total()`: Searches for Gleason scores where the total is not explicitly mentioned.
+
+    The function returns the first successful match found from these checks. 
+
+    Args:
+        text (str): The input text to search for Gleason score information.
+
+    Returns:
+        list[int] | None: The extracted indices and scores from the first
+        successful pattern match. List of length 6. Returns `None` if no patterns match.
+    """
     if vals := find_total_last(text) \
         or find_total_first(text) \
         or find_no_total(text):
@@ -81,6 +132,21 @@ def find_any_gleason(text: str):
     return None
 
 def find_gleasons(text: str):
+    """
+    Identifies and extracts Gleason score information from text. Also returns for debugging purposes a window of text around the extract scores. 
+
+    Args:
+        text (str): The input text to analyze for Gleason scores.
+
+    Returns:
+        list[list[[int, str]]: A list of lists, where each inner list represents a Gleason score match and contains:
+            - The starting index of the score in the text.
+            - The extracted Gleason score value.
+            - A label indicating whether it is "Gleason_1", "Gleason_2", or "Gleason_total".
+            - A string representing the context window around the score.
+
+        Returns an empty list if no Gleason scores are found.
+    """
     text = text.lower()
     all_matches = []
     for gl in re.finditer("gleason", text):
@@ -112,20 +178,16 @@ def find_gleasons(text: str):
     return all_matches
 
 
-def test_find_gleasons():
-    for sample in get_test_strs():
-        print(sample)
-        print(find_gleasons(sample))
+def get_test_strs() -> list[str]:
+    """
+    Returns a list of example strings found in pathology reports for prostate cancer, including information about gleason scores and biopsy cores.
+ 
+    Used to test regexes in get_regexs().
 
+    Returns:
+        list of str: A list containing the sample strings.
+    """
 
-def test_find_spacy():
-    for sample in get_test_strs():
-        print(sample)
-        print(find_gl_with_spacy(sample))
-
-
-
-def get_test_strs():
     str1A = "gleason score 3+3 = 6; 3 of 3 cores; 40%"
     str1B = "gleason score 4+4=9; one of two; 10%"
     str2 = "gleason 3+4=7/10, involving 5% of 1/2 cores"
@@ -148,9 +210,15 @@ def get_test_strs():
 
 
 def main():
-    print("Designed to extract phenotypes from EHR")
-    test_find_gleasons()
-    #test_find_spacy()
+    # -- Test using python regex module 
+    for sample in get_test_strs():
+        print(sample)
+        print(find_gleasons(sample))
+
+    # -- Test with spacy and regex
+    for sample in get_test_strs():
+        print(sample)
+        print(find_gl_with_spacy(sample))
 
 
 if __name__ == "__main__":
