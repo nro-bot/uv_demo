@@ -1,3 +1,7 @@
+'''
+Generate mock data for use in tests.
+Run metrics.
+'''
 import numpy as np
 import pandas as pd
 from phenoxtractor import find_gleasons
@@ -9,7 +13,6 @@ def get_truth_df():
 
 def get_text_df():
     return df
-
 
 def get_mock_truth_df():
     # make dummy df
@@ -75,3 +78,73 @@ def get_mock_results_df():
         }
     )
     return df
+
+
+
+def eval_find_gleasons(mock=True):
+    if mock:
+        predicted = get_mock_results_df()
+        truth_df = get_mock_truth_df()
+
+    metrics = truth_df.merge(
+        predicted, on=["TextSID", "Start"], suffixes=["_True", "_Pred"], how="outer"
+    )
+
+    metrics = metrics.assign(
+        TP=lambda x: (x.Label_True.astype(str) == x.Label_Pred.astype(str))
+        & (x.Text_True == x.Text_Pred),  # str to ensure non-null
+        FP=lambda x: x.Label_True.isna(),
+        FN=lambda x: x.Label_Pred.isna(),
+    )
+
+    TP = sum(metrics.TP)
+    FP = sum(metrics.FP)
+    FN = sum(metrics.FN)
+    TN = 0
+    precision = TP / (TP + FP)
+    print(f"{precision=}")
+
+    recall = TP / (TP + FN)
+    print(f"{recall=}")
+
+    f1 = 2 * (precision * recall) / (precision + recall)
+    print(f"{f1=}")
+
+    conf_matrix = [[TN, FP], [FN, TP]]
+
+    # -- Plot confusion matrix
+    sns.set_theme(font="serif", context="notebook", style="darkgrid", font_scale=1.5)
+    sns.heatmap(
+        conf_matrix,
+        annot=True,
+        fmt="d",
+        cmap="crest",
+        linewidth=0.5,
+        linecolor="gray",
+        xticklabels=["None", "Gleason"],
+        yticklabels=["None", "Gleason"],
+        cbar=False,
+        square=True,
+    )
+
+    plt.title("Confusion Matrix\n", fontdict={"weight": "bold", "size": "x-large"})
+    plt.xlabel("Predicted Label", labelpad=10)
+    plt.ylabel("True Label", labelpad=10)
+    plt.yticks(rotation=45)
+    # plt.subplots_adjust(bottom=0.5)
+
+    plt.figtext(
+        0.1,
+        0.1,  # -0.1
+        f""" TP = {TP} FP = {FP}\n TN = {TN} FN = {FN}"""
+        f"""\n Precision = {precision:.2f} \n Recall =    {recall:.2f}\n F1 Score =  {f1:.2f}""",
+        ha="left",
+        va="center",
+        fontsize=8,
+        font="monospace",
+    )
+    plt.tight_layout()
+    plt.show()
+
+if __name__ == '__main__':
+    eval_find_gleasons()
