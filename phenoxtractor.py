@@ -13,32 +13,6 @@ from rich import print
 # install(show_locals=True)
 
 
-def find_gl_with_spacy(text: str):
-    """
-    Finds Gleason score patterns in text using spaCy and regex.
-    Regex against full text, then matches are validated against SpaCy token spans and printed if valid.
-
-    Args:
-        text (str): Input text to analyze.
-
-    Returns:
-        list: Matched spans or an empty list if none are found.
-    """
-    import spacy
-    from spacy.matcher import Matcher
-
-    nlp = spacy.load("en_core_web_sm")
-    results = []
-    doc = nlp(text)
-    for match in re.finditer(get_regexs()['regex_total_last'], doc.text):
-        start, end = match.span()
-        span = doc.char_span(start, end)
-        # This is a Span object or None,  if match doesn't map to valid token sequence
-        if span is not None:
-            print("Found match:", span.text)
-            print([span.start, span.end, span.label, span.text])
-    return results
-
 
 def get_regexs() -> dict[str, str]:
     """Return dictionary of regex strings.
@@ -113,16 +87,11 @@ def checksum(a,b,c) -> bool:
     """
     return a+b==c
 
-def find_any_gleason(text: str) -> list[int] | None:
+def apply_regexs(text: str) -> list[int] | None:
     """
-    Extracts Gleason score information from the input text using multiple patterns. 
+    Extracts Gleason score information from the input text using multiple patterns. Returns first successful match found. 
 
-    Three patterns are used.
-    - `find_total_last()`: Gleason scores with the total at the end.
-    - `find_total_first()`: Scores with the total at the beginning.
-    - `find_no_total()`: Scores where the total is not mentioned..
-
-    The function returns the first successful match found. 
+    Three patterns are used. 
 
     Args:
         text (str): The input text to search.
@@ -145,7 +114,7 @@ def find_gleasons(text: str):
         text (str): The input text to analyze for Gleason scores.
 
     Returns:
-        A list of lists. Each inner list represents a Gleason score match.  Inner list contains:
+        A list of lists. Each inner list represents a Gleason score match.  Inner list contains four items:
             - The starting index of the score in the text.
             - The extracted Gleason score value.
             - Label: One of  "Gleason_1", "Gleason_2", or "Gleason_total".
@@ -170,7 +139,7 @@ def find_gleasons(text: str):
         else:
             end += gl.start()+1
             candidate=text[gl.start() : end]
-        gleason_match = find_any_gleason(candidate)
+        gleason_match = apply_regexs(candidate)
 
         if gleason_match:
             idx1, idx2, idx_total, gleason1, gleason2, gleason_total = gleason_match
@@ -182,6 +151,33 @@ def find_gleasons(text: str):
             ])
 
     return all_matches
+
+def find_gl_with_spacy(text: str):
+    """
+    Finds Gleason score patterns in text using spaCy and regex.
+    Regex against full text, then matches are validated against SpaCy token spans and printed if valid.
+
+    Args:
+        text (str): Input text to analyze.
+
+    Returns:
+        list: Matched spans or an empty list if none are found.
+    """
+    import spacy
+    from spacy.matcher import Matcher
+
+    nlp = spacy.load("en_core_web_sm")
+    results = []
+    doc = nlp(text)
+    for match in re.finditer(get_regexs()['regex_total_last'], doc.text):
+        start, end = match.span()
+        span = doc.char_span(start, end)
+        # This is a Span object or None,  if match doesn't map to valid token sequence
+        if span is not None:
+            print("Found match:", span.text)
+            print([span.start, span.end, span.label, span.text])
+    return results
+
 
 
 def get_test_strs() -> list[str]:
@@ -215,17 +211,47 @@ def get_test_strs() -> list[str]:
     return strs
 
 
-def main():
+def test_regexs():
     # -- Test using python regex module 
     for sample in get_test_strs():
         print(sample)
-        print(find_gleasons(sample))
+        print(apply_regexs(sample))
 
+def test_spacy_regexs():
     # -- Test with spacy and regex
     for sample in get_test_strs():
         print(sample)
         print(find_gl_with_spacy(sample))
 
+
+def extract_and_eval():
+    from data_loader import get_data
+
+    data, truth = get_data()
+
+    predictions = []
+    for i, row in data.iterrows():
+        pid = row.PatientICN
+        sid = row.TextSID
+        text = data.ReportText
+
+        gleasons = find_gleasons(text)
+        predictions.extend(
+            gleasons.extend([pid, sid])
+        )
+
+    predictions = pd.DataFrame(predictions, 
+        columns=['Start', 'Text', 'Label', 'Context', 'PatientICN', 'TextSID']
+    )
+    
+    from model_evaluator import eval_gleason
+    eval_gleason_model(truth, predictions)
+
+
+def main():
+    #text_regexs()
+    #text_spacy_regexs()
+    extract_and_eval()
 
 if __name__ == "__main__":
     main()
