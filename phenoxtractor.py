@@ -62,18 +62,23 @@ def find_total_first(text: str) -> list[int] | None:
 def find_no_total(text: str) -> list[int] | None:
     m = re.search(get_regexs()['regex_no_total'], text)
     if m:
-        gleason1, gleason2 = int(m.groups(1)), int(m.groups(3))
-        idx1, idx2 = m.start(1), m.start(2)
-
+        gleason1, gleason2 = int(m.group(1)), int(m.group(3))
+        gleason_total = gleason1 + gleason2 # Assumption
+        idx1, idx2, idx_total = m.start(1), m.start(3), m.start(3) + 2 # Assumption on last part
+        return [idx1, idx2, idx_total, gleason1, gleason2, gleason_total]
     return None
 
+def checksum(a,b,c) -> bool:
+    return a+b==c
 
-def find_matches(text: str):
-    if vals := find_total_last(text) or find_total_first(text):
+
+def find_any_gleason(text: str):
+    if vals := find_total_last(text) \
+        or find_total_first(text) \
+        or find_no_total(text):
         # if checksum(*vals[3:]):
-        return vals
+            return vals
     return None
-
 
 def find_gleasons(text: str):
     text = text.lower()
@@ -93,7 +98,7 @@ def find_gleasons(text: str):
         else:
             end += gl.start()+1
             candidate=text[gl.start() : end]
-        gleason_match = find_matches(candidate)
+        gleason_match = find_any_gleason(candidate)
 
         if gleason_match:
             idx1, idx2, idx_total, gleason1, gleason2, gleason_total = gleason_match
