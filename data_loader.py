@@ -8,15 +8,15 @@ import re
 from rich import print
 from typing import Tuple
 
-SERVER = '\\\\vacrrdevmavdi01.vha.med.va.gov\\'
-SERVER = '\\\\vacrrdevmavdi01.vha.med.va.gov'
-PROJ_HOME = 'Projects/OncApps/data/profound/'
-DATA_DIR = 'annotations/'
-USER = 'ruiouyang/'
-
-HOME = Path(SERVER) / PROJ_HOME / DATA_DIR  
 
 def get_path_consts():
+    SERVER = '\\\\vacrrdevmavdi01.vha.med.va.gov\\'
+    SERVER = '\\\\vacrrdevmavdi01.vha.med.va.gov'
+    PROJ_HOME = 'Projects/OncApps/data/profound/'
+    DATA_DIR = 'annotations/'
+
+    HOME = Path(SERVER) / PROJ_HOME / DATA_DIR  
+
     TEXT_FILES = {
         'small': 'uploaded_samples/Pathology_train_supplement.csv', # 5.4k, Fulltext, Gleason bool, 40 px
         # - PatientICN, ..., TIUDocumentSID, ..., ReportText, Gleason (bool), cores (bool)
@@ -36,7 +36,7 @@ def get_path_consts():
         '_medium_fulltext': TEXT_FILES['small']
     }  
 
-    return TEXT_FILES, LABEL_FILES
+    return HOME, TEXT_FILES, LABEL_FILES
 
 def get_data(files_dict_key='small') -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
@@ -51,7 +51,7 @@ def get_data(files_dict_key='small') -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
 
 
-    TEXT_FILES, LABEL_FILES = get_path_consts() 
+    HOME, TEXT_FILES, LABEL_FILES = get_path_consts() 
 
     labels = pd.read_csv(HOME / LABEL_FILES[files_dict_key])
     text = pd.read_csv(HOME / LABEL_FILES[f'__{files_dict_key}__']) 

@@ -224,7 +224,7 @@ def test_spacy_regexs():
         print(find_gl_with_spacy(sample))
 
 
-def extract_and_eval():
+def extract_and_eval(export=False):
     from data_loader import get_data
 
     data, truth = get_data()
@@ -243,6 +243,14 @@ def extract_and_eval():
     predictions = pd.DataFrame(predictions, 
         columns=['Start', 'Text', 'Label', 'Context', 'PatientICN', 'TextSID']
     )
+    
+    from data_loader import get_path_consts
+
+    HOME, _, _ = get_path_consts()
+    USER = 'ruiouyang/'
+
+    if export:
+        predictions.to_csv(Path(home) / USER / 'predictions.csv', index=False) 
     
     from model_evaluator import eval_gleason_model
     eval_gleason_model(truth, predictions)
