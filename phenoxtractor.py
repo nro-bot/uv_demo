@@ -33,7 +33,7 @@ def find_gl_with_spacy(text: str):
     return results
 
 
-def get_regexs() -> Dict[str, str]:
+def get_regexs() -> dict[str, str]:
     """Return dictionary of regex strings.
     """
     # _3to5_ = '[3-5]'
