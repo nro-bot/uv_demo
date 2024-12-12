@@ -185,15 +185,22 @@ def find_gl_with_spacy(text: str):
     nlp = spacy.blank("en")
     matcher = Matcher(nlp.vocab)
     regexs = get_regexs()
-    pattern = [
-        {"TEXT": {"REGEX": r"[3-6]"}},  # Matches "3+3"
-        {"TEXT": "+"},  # Matches "3+3"
-        {"TEXT": {"REGEX": r"[3-6]"}},  # Matches "3+3"
+        #{"TEXT": "+"},  
+    total_last_pattern = [
+        {"TEXT": {"REGEX": r"[3-6]"}},  
+        {"IS_DIGIT": False},  
+        {"TEXT": {"REGEX": r"[3-6]"}},  
     ]
-    matcher.add("gleason components", [pattern])
+    total_first_pattern = [
+        {"TEXT": {"REGEX": r"[3-6]"}},  
+        {"TEXT": ""},  
+        {"TEXT": {"REGEX": r"[3-6]"}},  
+    ]
+    #matcher.add("TOTAL_LAST", [total_last_pattern])
+    matcher.add("GLEASON_COMPONENT", [total_last_pattern, total_first_pattern])
     doc = nlp(text)
     matches = matcher(doc)
-    print('> num matche:', len(matches))
+    print('> num matches:', len(matches))
     # for match_id, start, end in matches:
     #     print("> Match found:", doc[start:end])
     print('>', end=' ')
