@@ -12,6 +12,11 @@ from rich import print
 # from rich.traceback import install
 # install(show_locals=True)
 
+# -- temporary - factor spacy imports to another file later
+import spacy
+from spacy.matcher import Matcher
+# 
+
 
 
 def get_regexs() -> dict[str, str]:
@@ -163,20 +168,42 @@ def find_gl_with_spacy(text: str):
     Returns:
         list: Matched spans or an empty list if none are found.
     """
-    import spacy
-    from spacy.matcher import Matcher
+    #import spacy
+    #from spacy.matcher import Matcher
 
-    nlp = spacy.load("en_core_web_sm")
-    results = []
+    # nlp = spacy.load("en_core_web_sm")
+    # results = []
+    # doc = nlp(text)
+    # for match in re.finditer(get_regexs()['regex_total_last'], doc.text):
+    #     start, end = match.span()
+    #     span = doc.char_span(start, end)
+    #     # This is a Span object or None,  if match doesn't map to valid token sequence
+    #     if span is not None:
+    #         print("Found match:", span.text)
+    #         print([span.start, span.end, span.label, span.text])
+
+    nlp = spacy.blank("en")
+    matcher = Matcher(nlp.vocab)
+    regexs = get_regexs()
+    pattern = [
+        {"TEXT": {"REGEX": r"[3-6]"}},  # Matches "3+3"
+        {"TEXT": "+"},  # Matches "3+3"
+        {"TEXT": {"REGEX": r"[3-6]"}},  # Matches "3+3"
+    ]
+    matcher.add("gleason components", [pattern])
     doc = nlp(text)
-    for match in re.finditer(get_regexs()['regex_total_last'], doc.text):
-        start, end = match.span()
-        span = doc.char_span(start, end)
-        # This is a Span object or None,  if match doesn't map to valid token sequence
-        if span is not None:
-            print("Found match:", span.text)
-            print([span.start, span.end, span.label, span.text])
-    return results
+    matches = matcher(doc)
+    print('> num matche:', len(matches))
+    # for match_id, start, end in matches:
+    #     print("> Match found:", doc[start:end])
+    print('>', end=' ')
+    for token in doc:
+        if any(start <= token.i < end for _, start, end in matches):
+            print(f"[black on yellow]{token.text}[/black on yellow]", end=" ")
+        else:
+            #print(f'{token.text}', end=" ")
+            print(f'[white on blue]{token.text}[/white on blue]', end=" ")
+    #return results
 
 
 
@@ -260,9 +287,9 @@ def extract_and_eval(export=False):
 
 
 def main():
-    #text_regexs()
-    #text_spacy_regexs()
-    extract_and_eval()
+    #test_regexs()
+    test_spacy_regexs()
+    #extract_and_eval()
 
 if __name__ == "__main__":
     main()
