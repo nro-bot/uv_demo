@@ -168,6 +168,7 @@ def find_gl_with_spacy(text: str):
     Returns:
         list: Matched spans or an empty list if none are found.
     """
+
     #import spacy
     #from spacy.matcher import Matcher
 
@@ -198,6 +199,7 @@ def find_gl_with_spacy(text: str):
     ]
     #matcher.add("TOTAL_LAST", [total_last_pattern])
     matcher.add("GLEASON_COMPONENT", [total_last_pattern, total_first_pattern])
+
     doc = nlp(text)
     matches = matcher(doc)
     print('> num matches:', len(matches))

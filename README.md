@@ -39,3 +39,8 @@ git add uv.lock
 git commit -m "update dependencies"
 uv pip compile pyproject.toml -o requirements.txt
 ```
+
+## Tips n Tricks
+
+Can preview rules and see tokens using this site;
+https://demos.explosion.ai/matcher?text=gleason%20score%207%20(3%20%2B%204)&model=en_core_web_sm&pattern=[{"id"%3A0%2C"attrs"%3A[{"name"%3A"IS_DIGIT"%2C"value"%3Atrue}]}%2C{"id"%3A3%2C"attrs"%3A[{"name"%3A"IS_PUNCT"%2C"value"%3Atrue}]}%2C{"id"%3A4%2C"attrs"%3A[{"name"%3A"IS_DIGIT"%2C"value"%3Afalse}]}]
